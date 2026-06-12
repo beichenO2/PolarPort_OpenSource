@@ -1,0 +1,87 @@
+{
+  "endpoints": [
+    {
+      "method": "POST",
+      "path": "/api/allocate",
+      "description": "Idempotent port allocation for (service_name, project).",
+      "request_schema": {
+        "type": "object",
+        "required": ["service_name", "project"],
+        "properties": {
+          "service_name": { "type": "string" },
+          "project": { "type": "string" },
+          "preferred_port": { "type": "integer" }
+        }
+      },
+      "response_schema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "port": { "type": "integer" }
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/release",
+      "description": "Release an active port back to the pool."
+    },
+    {
+      "method": "POST",
+      "path": "/api/heartbeat",
+      "description": "Refresh last_verified on an allocated port."
+    },
+    {
+      "method": "GET",
+      "path": "/api/list",
+      "description": "List currently active ports (or all with ?all=true)."
+    },
+    {
+      "method": "POST",
+      "path": "/api/ports/reserve",
+      "description": "Reserve a preferred port for a service/project pair.",
+      "request_schema": {
+        "type": "object",
+        "required": ["service_name", "project", "preferred_port"],
+        "properties": {
+          "service_name": { "type": "string", "minLength": 1 },
+          "project": { "type": "string", "minLength": 1 },
+          "preferred_port": { "type": "integer", "minimum": 1, "maximum": 65535 }
+        }
+      },
+      "response_schema": {
+        "type": "object",
+        "required": ["ok", "service_name", "project", "preferred_port"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "service_name": { "type": "string" },
+          "project": { "type": "string" },
+          "preferred_port": { "type": "integer" }
+        }
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/ports/reserve/:service_name/:project",
+      "description": "Cancel a preferred port reservation.",
+      "response_schema": {
+        "type": "object",
+        "required": ["ok", "service_name", "project"],
+        "properties": {
+          "ok": { "type": "boolean" },
+          "service_name": { "type": "string" },
+          "project": { "type": "string" }
+        }
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/ports/reserved",
+      "description": "List all active port reservations.",
+      "response_schema": {
+        "type": "array",
+        "items": { "$ref": "#/definitions/PreferredReservation" }
+      }
+    }
+  ]
+}

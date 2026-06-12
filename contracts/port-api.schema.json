@@ -1,0 +1,51 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PolarPort HTTP API",
+  "description": "PolarPort 对外 HTTP API 契约。每个 endpoint 提供 request/response 子 schema。",
+  "type": "object",
+  "definitions": {
+    "PortStatus": {
+      "type": "string",
+      "enum": ["active", "released", "stale"]
+    },
+    "PortRow": {
+      "type": "object",
+      "required": ["port", "service_name", "project", "status"],
+      "properties": {
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "service_name": { "type": "string", "minLength": 1 },
+        "project": { "type": "string", "minLength": 1 },
+        "device_id": { "type": "string" },
+        "status": { "$ref": "#/definitions/PortStatus" },
+        "allocated_at": { "type": "string", "format": "date-time" },
+        "last_verified": { "type": "string", "format": "date-time" }
+      }
+    },
+    "PreferredReservation": {
+      "type": "object",
+      "required": ["service_name", "project", "preferred_port"],
+      "properties": {
+        "service_name": { "type": "string", "minLength": 1 },
+        "project": { "type": "string", "minLength": 1 },
+        "preferred_port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "created_at": { "type": "string", "format": "date-time" }
+      }
+    }
+  },
+  "properties": {
+    "endpoints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["method", "path"],
+        "properties": {
+          "method": { "type": "string", "enum": ["GET", "POST", "DELETE"] },
+          "path": { "type": "string" },
+          "description": { "type": "string" },
+          "request_schema": { "type": "object" },
+          "response_schema": { "type": "object" }
+        }
+      }
+    }
+  }
+}

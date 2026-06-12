@@ -1,0 +1,190 @@
+{
+  "name": "PolarPort",
+  "_meta": {
+    "schema_version": "1.0",
+    "last_synced_at": "2026-06-10T00:00:00+08:00"
+  },
+  "description": "Service / port registry — provides idempotent port allocation, heartbeat-based liveness tracking, and a thin HTTP API consumable by every Polarisor project. Migrated from SOTAgent's port responsibility per 260505 batch decision A1.",
+  "tier": "infra",
+  "status": "active",
+  "version": "0.1.0",
+  "requirements": [
+    {
+      "id": "R1",
+      "need": "幂等的端口分配 — 同一服务/项目反复 allocate 拿到同一端口，过期端口自动复活",
+      "approach": "better-sqlite3 持久化的 ports 表（service_name + project + device_id + status + last_verified）；POST /api/allocate 优先复用 active 行；preferred_port 必须以 0 或 5 结尾（合规规则保留自 SOTAgent）",
+      "tech": {
+        "Hono": "4",
+        "better-sqlite3": "12"
+      },
+      "features": [
+        {
+          "name": "POST /api/allocate",
+          "status": "done",
+          "interfaces": [
+            "POST /api/allocate { service_name, project, preferred_port?, range_start?, range_end? } → { ok, port }"
+          ],
+          "behavior": [
+            "service_name+project 命中已 active 行 → 返回原端口",
+            "命中 released/stale 行且端口未被占用 → 复活并返回",
+            "preferred_port 提供且合规且空闲 → 直接占用",
+            "都不命中 → 在 [range_start..range_end] 中找以 0/5 结尾且未被占用的端口"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        },
+        {
+          "name": "POST /api/release",
+          "status": "done",
+          "interfaces": [
+            "POST /api/release { port } → { ok }"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "need": "心跳监控 — 30s 没心跳即视为 stale，新分配可以复用 stale 端口",
+      "approach": "/api/heartbeat 更新 last_verified；/api/list 标注 active vs stale；后台 cron 周期把超期 active 翻 stale（首版可省，由读时计算）",
+      "features": [
+        {
+          "name": "POST /api/heartbeat",
+          "status": "done",
+          "interfaces": [
+            "POST /api/heartbeat { port, service_name?, project? } → { ok, last_verified }"
+          ],
+          "behavior": [
+            "active 端口直接 touch",
+            "released/stale 端口 + 身份匹配 + 端口未被监听 → 复活"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        },
+        {
+          "name": "GET /api/list",
+          "status": "done",
+          "interfaces": [
+            "GET /api/list?all=true → [{ port, service_name, project, status, last_verified }]"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "need": "PolarPort SDK 为全生态唯一端口分配入口",
+      "approach": "保持 /api 路径与 SOTAgent ports 同形（PolarPort 自己只暴露 /api/allocate 等无 /ports 前缀；通过 SOTAgent facade 透传 /api/ports/*）",
+      "features": [
+        {
+          "name": "facade 同形契约",
+          "status": "done",
+          "interfaces": [
+            "request/response 与 SOTAgent /api/ports/* 1:1 等价"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        },
+        {
+          "name": "@polarport/port-sdk 客户端",
+          "status": "planned",
+          "behavior": [
+            "SDK 迁移已完成；所有调用方已指向 PolarPort/src/sdk/"
+          ],
+          "test_status": "not_tested"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "need": "preferred 端口预留 — 分配时尊重其他服务的预留，防止跨服务抢占",
+      "approach": "preferred_reservations SQLite 表 + allocate() 前置检查 + reserve/release/list HTTP API + 启动时 seed 已知服务",
+      "features": [
+        {
+          "name": "POST /api/ports/reserve",
+          "status": "done",
+          "interfaces": [
+            "POST /api/ports/reserve { service_name, project, preferred_port } → { ok, service_name, project, preferred_port }"
+          ],
+          "behavior": [
+            "预留 (service_name, project) → preferred_port 映射",
+            "幂等：同一身份重复预留无副作用",
+            "preferred_port 必须以 0 或 5 结尾"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        },
+        {
+          "name": "DELETE /api/ports/reserve/:service_name/:project",
+          "status": "done",
+          "interfaces": [
+            "DELETE /api/ports/reserve/:service_name/:project → { ok, service_name, project }"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        },
+        {
+          "name": "GET /api/ports/reserved",
+          "status": "done",
+          "interfaces": [
+            "GET /api/ports/reserved → [{ service_name, project, preferred_port, created_at }]"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        },
+        {
+          "name": "allocate 预留门控",
+          "status": "done",
+          "behavior": [
+            "allocate() 在 honour preferred 前检查 preferred_reservations",
+            "如果 preferred_port 被其他 (service_name, project) 预留 → 跳过该端口进入范围扫描",
+            "同一身份的预留不影响其自身 allocate"
+          ],
+          "test_status": "passed",
+          "evidence": [
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+          ]
+        }
+      ]
+    }
+  ],
+  "tech": {
+    "Hono": "4",
+    "better-sqlite3": "12",
+    "TypeScript": "5"
+  },
+  "depends_on": [
+    {
+      "project": "SOTAgent",
+      "reason": "启动时通过 SOTAgent port-sdk 取自己的端口（service_name=polar-port）；fallback 到 11050",
+      "endpoint": "http://127.0.0.1:4800/api/ports/allocate"
+    }
+  ],
+  "service_management": {
+    "install_command": "npm ci",
+    "start_command": "npm start",
+    "restart_command": "npm start",
+    "health_endpoint": "http://127.0.0.1:11050/api/health"
+  },
+  "contacts": [
+    "@beichenO2"
+  ]
+}

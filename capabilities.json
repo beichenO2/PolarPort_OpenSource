@@ -1,0 +1,79 @@
+{
+  "project": "PolarPort",
+  "version": "0.1.0",
+  "capabilities": [
+    {
+      "id": "polarport.allocate",
+      "service_name": "polar-port",
+      "description": "Allocate a port idempotently for (service_name, project). Reuses the existing active row if one matches; revives released/stale rows when applicable; otherwise allocates a fresh compliant port (ends in 0 or 5).",
+      "transport": "http",
+      "endpoint": "/api/allocate",
+      "method": "POST",
+      "input_schema": {
+        "type": "object",
+        "required": ["service_name", "project"],
+        "properties": {
+          "service_name": { "type": "string" },
+          "project": { "type": "string" },
+          "preferred_port": { "type": "integer" },
+          "range_start": { "type": "integer" },
+          "range_end": { "type": "integer" }
+        },
+        "additionalProperties": false
+      },
+      "output_schema": {
+        "type": "object",
+        "properties": {
+          "ok": { "type": "boolean" },
+          "port": { "type": "integer" },
+          "service_name": { "type": "string" },
+          "project": { "type": "string" }
+        }
+      },
+      "idempotent": true,
+      "side_effects": true,
+      "timeout_ms": 5000,
+      "migrated_from": "SOTAgent",
+      "status": "core"
+    },
+    {
+      "id": "polarport.release",
+      "service_name": "polar-port",
+      "endpoint": "/api/release",
+      "method": "POST",
+      "description": "Release a port allocation by port number.",
+      "transport": "http",
+      "idempotent": true,
+      "side_effects": true,
+      "timeout_ms": 3000,
+      "migrated_from": "SOTAgent",
+      "status": "core"
+    },
+    {
+      "id": "polarport.heartbeat",
+      "service_name": "polar-port",
+      "endpoint": "/api/heartbeat",
+      "method": "POST",
+      "description": "Touch last_verified on an allocated port; revive matching released/stale row.",
+      "transport": "http",
+      "idempotent": true,
+      "side_effects": true,
+      "timeout_ms": 3000,
+      "migrated_from": "SOTAgent",
+      "status": "core"
+    },
+    {
+      "id": "polarport.list",
+      "service_name": "polar-port",
+      "endpoint": "/api/list",
+      "method": "GET",
+      "description": "List active ports (default) or all rows when ?all=true.",
+      "transport": "http",
+      "idempotent": true,
+      "side_effects": false,
+      "timeout_ms": 3000,
+      "migrated_from": "SOTAgent",
+      "status": "core"
+    }
+  ]
+}

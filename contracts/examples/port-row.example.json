@@ -1,0 +1,9 @@
+{
+  "port": 8765,
+  "service_name": "polarcop-hub",
+  "project": "PolarCopilot",
+  "device_id": "mac-studio",
+  "status": "active",
+  "allocated_at": "2026-05-08T06:00:00.000Z",
+  "last_verified": "2026-05-08T06:01:30.000Z"
+}
