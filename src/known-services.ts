@@ -32,6 +32,7 @@ export const KNOWN_RESERVATIONS: KnownService[] = [
   { service_name: "infoforge-api", project: "InfoForge", port: 3901 },
   { service_name: "infoforge-sse", project: "InfoForge", port: 3902 },
   { service_name: "tqsdk-collector", project: "tqsdk", port: 18900 },
+  { service_name: "tqsdk-gateway", project: "tqsdk", port: 12890 },
 ];
 
 /** Active port registrations — all ecosystem services including external tools. */

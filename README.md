@@ -134,7 +134,7 @@ PORT=$(claim_port "my-service" "MyProject" "4880")
 
 | 项目 | 角色 | 是否必须 |
 |------|------|----------|
-| [SOTAgent](https://github.com/beichenO2/SOTAgent) | 自举端口分配 + facade 桥接（`/api/ports/*`） | 推荐 |
+| [SOTAgent](https://github.com/beichenO2/SOTAgent) | console 前端展示 + facade 桥接（`/api/ports/*` 透传本服务；端口权威在本服务） | 推荐 |
 | [PolarProcess](https://github.com/beichenO2/PolarProcess) | 服务重启时释放/reclaim 端口；Watchdog stale sweep | 推荐 |
 | [Agent_core](https://github.com/beichenO2/Agent_core) | `port-claim.sh` 共享脚本 | 推荐 |
 | [PolarCopilot](https://github.com/beichenO2/PolarCopilot) | Hub Console 端口视图 embed | 可选 |
