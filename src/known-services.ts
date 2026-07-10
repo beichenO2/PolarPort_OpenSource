@@ -33,6 +33,8 @@ export const KNOWN_RESERVATIONS: KnownService[] = [
   { service_name: "infoforge-sse", project: "InfoForge", port: 3902 },
   { service_name: "tqsdk-collector", project: "tqsdk", port: 18900 },
   { service_name: "tqsdk-gateway", project: "tqsdk", port: 12890 },
+  { service_name: "polarflow-api", project: "PolarFlow", port: 8120 },
+  { service_name: "polarflow-editor-dev", project: "PolarFlow", port: 8125 },
 ];
 
 /** Active port registrations — all ecosystem services including external tools. */
