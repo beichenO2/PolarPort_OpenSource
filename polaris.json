@@ -25,14 +25,15 @@
             "POST /api/allocate { service_name, project, preferred_port?, range_start?, range_end? } → { ok, port }"
           ],
           "behavior": [
-            "service_name+project 命中已 active 行 → 返回原端口",
+            "service_name+project 命中已 active 行 → 返回原端口；端口正在监听也不得跨权威触发服务 restart",
             "命中 released/stale 行且端口未被占用 → 复活并返回",
             "preferred_port 提供且合规且空闲 → 直接占用",
             "都不命中 → 在 [range_start..range_end] 中找以 0/5 结尾且未被占用的端口"
           ],
           "test_status": "passed",
           "evidence": [
-            "2026-06-10: feature verified in codebase (L2 gate audit backfill)"
+            "2026-06-10: feature verified in codebase (L2 gate audit backfill)",
+            "2026-07-27: repeat active allocation kept lifecycle ownership in PolarProcess; PolarPort contract tests 9/9 and TypeScript build passed"
           ]
         },
         {

@@ -106,23 +106,6 @@ export class PortRegistry {
     });
   }
 
-  /**
-   * Ask PolarProcess to kill the old process on a port and prepare for restart.
-   * Best-effort — PolarProcess may not be running.
-   */
-  static async requestProcessRestart(serviceName: string, port: number): Promise<void> {
-    const ppUrl = process.env.POLARPROCESS_URL ?? 'http://127.0.0.1:11055';
-    try {
-      await fetch(`${ppUrl}/api/services/${encodeURIComponent(serviceName)}/restart`, {
-        method: 'POST',
-        signal: AbortSignal.timeout(5000),
-      });
-      console.log(`[PortRegistry] Requested PolarProcess restart for ${serviceName} (port ${port})`);
-    } catch {
-      console.warn(`[PortRegistry] PolarProcess unreachable, cannot restart ${serviceName}`);
-    }
-  }
-
   listAll(): PortRow[] {
     return this.db.prepare('SELECT * FROM ports ORDER BY port').all() as PortRow[];
   }
@@ -271,11 +254,6 @@ export class PortRegistry {
       )
       .get(sn, pj) as PortRow | undefined;
     if (existingActive) {
-      const portBusy = await PortRegistry.isPortInUse(existingActive.port);
-      if (portBusy) {
-        await PortRegistry.requestProcessRestart(sn, existingActive.port);
-        await new Promise(r => setTimeout(r, 2000));
-      }
       this.touch(existingActive.port);
       return { port: existingActive.port, reused: true, reactivated: false };
     }

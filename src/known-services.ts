@@ -16,8 +16,10 @@ export const KNOWN_RESERVATIONS: KnownService[] = [
   { service_name: "polar-process", project: "PolarProcess", port: 11055 },
   { service_name: "sotagent", project: "SOTAgent", port: 4800 },
   { service_name: "polarpilot", project: "PolarPilot", port: 4900 },
-  { service_name: "polarprivate", project: "PolarPrivate", port: 12790 },
-  { service_name: "polarprivate-frontend", project: "PolarPrivate", port: 12795 },
+  // Canonical identities match PolarPrivate Start/*.sh + PolarProcess service_id.
+  // Legacy polarprivate / polarprivate-frontend names blocked privportal-* from claiming preferred ports.
+  { service_name: "privportal-backend", project: "PolarPrivate", port: 12790 },
+  { service_name: "privportal-frontend", project: "PolarPrivate", port: 12795 },
   { service_name: "polarclock-backend", project: "Clock", port: 15550 },
   { service_name: "polarclock-frontend", project: "Clock", port: 4555 },
   { service_name: "polarui-dev", project: "PolarUI", port: 5170 },

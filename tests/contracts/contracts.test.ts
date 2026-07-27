@@ -8,6 +8,7 @@ import { describe, it, expect } from 'vitest';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createServer, type AddressInfo, type Server } from 'node:net';
 import Ajv from 'ajv';
 import addFormats from 'ajv-formats';
 import { PortRegistry } from '../../src/registry.js';
@@ -24,6 +25,17 @@ function makeValidator() {
   if (typeof addFormats === 'function') addFormats(ajv);
   else if (typeof (addFormats as any)?.default === 'function') (addFormats as any).default(ajv);
   return ajv;
+}
+
+function listen(server: Server): Promise<AddressInfo> {
+  return new Promise((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', () => resolve(server.address() as AddressInfo));
+  });
+}
+
+function close(server: Server): Promise<void> {
+  return new Promise((resolve, reject) => server.close((err) => err ? reject(err) : resolve()));
 }
 
 describe('PolarPort contract tests', () => {
@@ -76,6 +88,42 @@ describe('PolarPort contract tests', () => {
     expect(second.reused).toBe(true);
     reg.close();
     rmSync(tmp, { recursive: true, force: true });
+  });
+
+  it('PortRegistry: repeat allocation never asks PolarProcess to restart the current owner', async () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'polarport-owned-busy-'));
+    const reg = new PortRegistry(join(tmp, 'ports.sqlite'));
+    const owner = createServer();
+    const restartProbe = createServer();
+    const originalPolarProcessUrl = process.env.POLARPROCESS_URL;
+    let restartRequests = 0;
+
+    try {
+      const ownerAddress = await listen(owner);
+      restartProbe.on('connection', () => { restartRequests += 1; });
+      const probeAddress = await listen(restartProbe);
+      process.env.POLARPROCESS_URL = `http://127.0.0.1:${probeAddress.port}`;
+      reg.registerKnownPort('svc-owned', 'ProjectOwned', ownerAddress.port);
+
+      const result = await reg.allocate({
+        service_name: 'svc-owned',
+        project: 'ProjectOwned',
+      });
+
+      expect(result).toEqual({
+        port: ownerAddress.port,
+        reused: true,
+        reactivated: false,
+      });
+      expect(restartRequests).toBe(0);
+    } finally {
+      if (originalPolarProcessUrl === undefined) delete process.env.POLARPROCESS_URL;
+      else process.env.POLARPROCESS_URL = originalPolarProcessUrl;
+      await close(owner);
+      await close(restartProbe);
+      reg.close();
+      rmSync(tmp, { recursive: true, force: true });
+    }
   });
 
   it('PortRegistry: release flips status and frees the slot for re-allocation', async () => {
