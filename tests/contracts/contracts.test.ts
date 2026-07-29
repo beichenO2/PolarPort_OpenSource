@@ -219,4 +219,21 @@ describe('PolarPort contract tests', () => {
     reg.close();
     rmSync(tmp, { recursive: true, force: true });
   });
+
+  it('createApp: GET /api/ports/:port/status returns registry + tcp probe', async () => {
+    const tmp = mkdtempSync(join(tmpdir(), 'polarport-status-'));
+    const reg = new PortRegistry(join(tmp, 'ports.sqlite'));
+    const app = createApp(reg);
+
+    const res = await app.request('/api/ports/8120/status');
+    expect(res.status).toBe(200);
+    const body = await res.json() as Record<string, unknown>;
+    expect(body.ok).toBe(true);
+    expect(body.port).toBe(8120);
+    expect(typeof body.tcp_in_use).toBe('boolean');
+    expect(typeof body.free).toBe('boolean');
+
+    reg.close();
+    rmSync(tmp, { recursive: true, force: true });
+  });
 });

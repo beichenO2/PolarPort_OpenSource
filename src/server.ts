@@ -166,6 +166,28 @@ export function createApp(registry: PortRegistry): Hono {
     return c.json(registry.listReservedPreferred());
   });
 
+  app.get('/api/ports/:port/status', async (c) => {
+    const port = Number(c.req.param('port'));
+    if (!Number.isInteger(port) || port < 1 || port > 65535) {
+      return c.json({ ok: false, message: 'invalid_port' }, 400);
+    }
+    const row = registry.getRow(port);
+    const active = registry.getActive(port);
+    const tcpInUse = await PortRegistry.isPortInUse(port);
+    return c.json({
+      ok: true,
+      port,
+      tcp_in_use: tcpInUse,
+      free: !tcpInUse,
+      in_registry: row != null,
+      status: row?.status ?? null,
+      service_name: row?.service_name ?? null,
+      project: row?.project ?? null,
+      active: active != null,
+      last_verified: row?.last_verified ?? null,
+    });
+  });
+
   app.post('/api/verify', async (c) => {
     const result = await registry.verifyAll();
     return c.json({ ok: true, ...result });

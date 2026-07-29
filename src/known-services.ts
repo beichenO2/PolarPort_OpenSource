@@ -10,10 +10,11 @@ export interface KnownService {
 
 /** Preferred-port reservations (must end in 0 or 5). */
 export const KNOWN_RESERVATIONS: KnownService[] = [
-  { service_name: "polarclaw-web", project: "PolarClaw", port: 3910 },
+  { service_name: "polarclaw", project: "PolarClaw", port: 3910 },
   { service_name: "autooffice", project: "AutoOffice", port: 3900 },
   { service_name: "polar-port", project: "PolarPort", port: 11050 },
   { service_name: "polar-process", project: "PolarProcess", port: 11055 },
+  { service_name: "polar-budget", project: "PolarBudget", port: 11060 },
   { service_name: "sotagent", project: "SOTAgent", port: 4800 },
   { service_name: "polarpilot", project: "PolarPilot", port: 4900 },
   // Canonical identities match PolarPrivate Start/*.sh + PolarProcess service_id.
@@ -33,7 +34,7 @@ export const KNOWN_RESERVATIONS: KnownService[] = [
   { service_name: "polarmemory-api", project: "PolarMemory", port: 3100 },
   { service_name: "infoforge-api", project: "InfoForge", port: 3901 },
   { service_name: "infoforge-sse", project: "InfoForge", port: 3902 },
-  { service_name: "tqsdk-collector", project: "tqsdk", port: 18900 },
+  { service_name: "tqsdk-data-collector", project: "tqsdk", port: 18900 },
   { service_name: "tqsdk-gateway", project: "tqsdk", port: 12890 },
   { service_name: "polarflow-api", project: "PolarFlow", port: 8120 },
   { service_name: "polarflow-editor-dev", project: "PolarFlow", port: 8125 },

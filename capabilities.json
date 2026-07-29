@@ -74,6 +74,18 @@
       "timeout_ms": 3000,
       "migrated_from": "SOTAgent",
       "status": "core"
+    },
+    {
+      "id": "polarport.port_status",
+      "service_name": "polar-port",
+      "endpoint": "/api/ports/:port/status",
+      "method": "GET",
+      "description": "Registry row + TCP bind probe for a port (safe substitute for lsof registry checks)",
+      "transport": "http",
+      "idempotent": true,
+      "side_effects": false,
+      "timeout_ms": 3000,
+      "status": "core"
     }
   ]
 }
