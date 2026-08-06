@@ -22,6 +22,7 @@ PolarPort 是 Polarisor 的端口分配服务，为所有项目提供幂等、�
 
 ## 与其他项目的关系
 
+- **PolarManager 三巨头之一**: PolarPort + PolarProcess + PolarBudget 合称 PolarManager，共同管理生态项目的端口 / 进程 / CPU
 - **从 SOTAgent 分拆而来**: 端口管理原为 SOTAgent R1 的一部分，因端口逻辑独立性强而分拆
 - **被所有服务依赖**: 每个需要监听端口的 Polarisor 服务都通过 PolarPort 获取端口
 - **SOTAgent 是特殊消费者**: SOTAgent 自身也通过 PolarPort 获取端口（自举）
