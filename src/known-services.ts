@@ -10,22 +10,17 @@ export interface KnownService {
 
 /** Preferred-port reservations (must end in 0 or 5). */
 export const KNOWN_RESERVATIONS: KnownService[] = [
-  { service_name: "polarclaw", project: "PolarClaw", port: 3910 },
   { service_name: "autooffice", project: "AutoOffice", port: 3900 },
   { service_name: "polar-port", project: "PolarPort", port: 11050 },
   { service_name: "polar-process", project: "PolarProcess", port: 11055 },
   { service_name: "polar-budget", project: "PolarBudget", port: 11060 },
   { service_name: "sotagent", project: "SOTAgent", port: 4800 },
-  { service_name: "polarpilot", project: "PolarPilot", port: 4900 },
   // Canonical identities match PolarPrivate Start/*.sh + PolarProcess service_id.
   // Legacy polarprivate / polarprivate-frontend names blocked privportal-* from claiming preferred ports.
   { service_name: "privportal-backend", project: "PolarPrivate", port: 12790 },
   { service_name: "privportal-frontend", project: "PolarPrivate", port: 12795 },
   { service_name: "polarclock-backend", project: "Clock", port: 15550 },
   { service_name: "polarclock-frontend", project: "Clock", port: 4555 },
-  { service_name: "polarui-dev", project: "PolarUI", port: 5170 },
-  { service_name: "dify-reference", project: "PolarUI", port: 8090 },
-  { service_name: "dify-reference-https", project: "PolarUI", port: 8450 },
   { service_name: "polarcop-web-dev", project: "PolarCopilot", port: 5180 },
   { service_name: "polarcop-hub", project: "PolarCopilot", port: 8040 },
   { service_name: "knowlever-rag", project: "KnowLever", port: 18080 },
@@ -47,7 +42,6 @@ export const KNOWN_SERVICES: KnownService[] = [
   { service_name: "digist-preview", project: "digist", port: 4880 },
   { service_name: "sotagent-console", project: "SOTAgent", port: 4880 },
   { service_name: "polar-process", project: "PolarProcess", port: 11055 },
-  { service_name: "polarops", project: "PolarOps", port: 11065 },
   // External / third-party / on-demand
   { service_name: "lm-studio", project: "—", port: 1234 },
   { service_name: "vocab-app", project: "English", port: 3000 },
